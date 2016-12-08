@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chartist: Pie Chart</title>
+  <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+  <link rel="stylesheet" href="vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.css">
+  <style type="text/css">
+    html, body {
+      font: 16px/1.7 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', source-han-sans-traditional, 'Microsoft JhengHei', sans-serif;
+      color: #424242;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', source-han-sans-traditional, 'Microsoft JhengHei', sans-serif;
+      font-weight: normal;
+    }
+    section { 
+      margin-bottom: 80px; 
+    }
+    #page {
+      margin: 0 auto;
+      padding: 20px 10px;
+      width: 800px;
+    }
+    .page-title {
+      margin-bottom: 60px;
+    }
+    .ct-chart {
+      position: relative;
+    }
+    .ct-chart-pie {
+      height: 400px;
+    }
+    .ct-chart-pie .ct-label {
+      font-size: 1em;
+      fill: rgba(0,0,0,.5);
+      color: rgba(0,0,0,.4);
+    }
+    #chart-pie-custom-label {
+      background: url(http://subtlepatterns2015.subtlepatterns.netdna-cdn.com/patterns/wov.png);
+    }
+    #chart-pie-custom-label .ct-label {
+      font-size: 1.5em;
+      text-shadow: 1px 1px 3px #555;
+      fill: #EA0F0F;
+      color: #EA0F0F;
+    }
+    #chart-pie-custom-label .ct-series-a .ct-slice-pie {
+      fill: rgba(8,110,217,.3);
+    }
+    #chart-pie-custom-label .ct-series-b .ct-slice-pie {
+      fill: #3E9957;
+    }
+    #chart-pie-custom-label .ct-series-c .ct-slice-pie {
+      fill: #E88109;
+    }
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+  <script src="vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+<div id="page">
+  <h1 class="page-title">Chartist: Pie Chart</h1>
+  <section>
+    <h3>Simple pie chart</h3>
+    <div id="chart-pie" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Pie chart (many data)</h3>
+    <div id="chart-pie-many-data" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Pie chart with custom label</h3>
+    <div id="chart-pie-custom-label" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Pie chart with tooltip</h3>
+    <div id="chart-pie-tooltip" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Donut</h3>
+    <div id="chart-pie-donut" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Donut (gauge)</h3>
+    <div id="chart-pie-donut-gauge" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Donut (custom)</h3>
+    <div id="chart-pie-donut-custom" class="ct-chart ct-chart-pie"></div>
+  </section>
+
+  <script type="text/javascript">
+
+  // simple pie chart
+    var data = {
+      series: [5, 3, 4]
+    };
+
+    var sum = function(a, b) { return a + b };
+
+    new Chartist.Pie('#chart-pie', data, {
+      labelInterpolationFnc: function(value) {
+        return Math.round(value / data.series.reduce(sum) * 100) + '%';
+      }
+    });
+
+  // simple pie chart
+    var data = {
+      series: [5, 3, 4, 9, 3, 5, 22, 10, 15, 19, 5, 8, 4, 13, 16, 2, 9]
+    };
+
+    var sum = function(a, b) { return a + b };
+
+    new Chartist.Pie('#chart-pie-many-data', data, {
+      labelInterpolationFnc: function(value) {
+        return Math.round(value / data.series.reduce(sum) * 100) + '%';
+      }
+    });
+  </script>
+  <script type="text/javascript">
+    // pie chart with custom label
+    var data1 = {
+      labels: ['夏天的香蕉', '春天的蘋果', '秋天的葡萄'],
+      series: [20, 15, 40]
+    };
+
+    var sum1 = function(a, b) { return a + b };
+    var i = 0;
+    var options = {
+      labelOffset: 100,
+      labelDirection: 'explode',
+      chartPadding: 20,
+      labelInterpolationFnc: function(value) {
+        var v = data1.series[i];
+        var p = Math.round(v / data1.series.reduce(sum1) * 100) + '%';
+        //console.log(p);
+        i++;
+        //console.log(data.series.reduce);
+        return value + ' ' + p;
+      }
+    };
+
+    var responsiveOptions = [
+      ['screen and (min-width: 640px)', {
+        chartPadding: 30,
+        labelOffset: 100,
+        labelDirection: 'explode',
+        labelInterpolationFnc: function(value) {
+          return value;
+        }
+      }],
+      ['screen and (min-width: 1024px)', {
+        labelOffset: 120,
+        chartPadding: 20
+      }]
+    ];
+
+    new Chartist.Pie('#chart-pie-custom-label', data1, options);
+
+    // Pie with tooltip
+    new Chartist.Pie('#chart-pie-tooltip', {
+      labels: [1, 2, 3],
+      series: [
+        [
+          {meta: 'description', value: 1 },
+          {meta: 'description', value: 5},
+          {meta: 'description', value: 3}
+        ],
+        [
+          {meta: 'other description', value: 2},
+          {meta: 'other description', value: 4},
+          {meta: 'other description', value: 2}
+        ]
+      ]
+    }, {
+      donut: true,
+      donutWidth: 60,
+      plugins: [
+        Chartist.plugins.tooltip()
+      ]
+    });
+
+    // Donut
+    new Chartist.Pie('#chart-pie-donut', {
+      series: [20, 10, 30, 40]
+    }, {
+      donut: true,
+      donutWidth: 60,
+    });
+
+    // Donut (gauge)
+    new Chartist.Pie('#chart-pie-donut-gauge', {
+      series: [20, 10, 30, 40]
+    }, {
+      donut: true,
+      donutWidth: 60,
+      startAngle: 270,
+      total: 200,
+    });
+
+    // Donut (custom)
+    var data2 = {
+      labels: ['夏天的香蕉是白色的', '春天的蘋果還沒成熟', '秋天的葡萄釀成酒剛剛好', '冬天的橘子不用烤也好吃'],
+      series: [20, 10, 30, 40]
+    }
+    var sum2 = function(a, b) { return a + b };
+    var j = 0;
+    new Chartist.Pie('#chart-pie-donut-custom', data2, {
+      chartPadding: 40,
+      donut: true,
+      donutWidth: 40,
+      startAngle: 270,
+      labelOffset: 40,
+      labelInterpolationFnc: function(value) {
+        var v = data2.series[j];
+        var p = Math.round(v / data2.series.reduce(sum2) * 100) + '%';
+        //console.log(p);
+        j++;
+        //console.log(data.series.reduce);
+        return value + ' ' + p;
+      }
+    });
+
+  </script>
+</div>
+</body>
+</html>
