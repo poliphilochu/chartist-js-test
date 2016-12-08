@@ -7,6 +7,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
   <link rel="stylesheet" href="vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.css">
   <style type="text/css">
+    .ct-chart-fill-donut .ct-series-a .ct-slice-donut {
+        stroke: #03a9f4;
+    }
+    .ct-chart-fill-donut .ct-series-b .ct-slice-donut {
+        stroke: rgba(0,0,0,.4);
+        opacity: 0.0;
+    }
+    .ct-chart-fill-donut .ct-fill-donut .ct-slice-donut{
+        stroke: rgba(0,0,0,.4);
+        opacity: 1;
+    }
+    .ct-fill-donut-label h3{
+        font-size: 2em;
+    }
+    .ct-fill-donut-label .small {
+        font-size: 0.6em;
+    }
+    .ct-fill-donut-label i { 
+        font-size: 1.5em;
+        color: rgba(0,0,0,.4);
+    }
+  </style>
+  <style type="text/css">
     html, body {
       font: 16px/1.7 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', source-han-sans-traditional, 'Microsoft JhengHei', sans-serif;
       color: #424242;
@@ -55,10 +78,10 @@
     #chart-pie-custom-label .ct-series-c .ct-slice-pie {
       fill: #E88109;
     }
-
   </style>
   <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
   <script src="vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.min.js"></script>
+  <script src="vendor/chartist-plugin-fill-donut/chartist-plugin-fill-donut.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
@@ -91,6 +114,10 @@
   <section>
     <h3>Donut (custom)</h3>
     <div id="chart-pie-donut-custom" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Donut (fill)</h3>
+    <div id="chart-pie-donut-fill" class="ct-chart ct-chart-pie ct-chart-fill-donut"></div>
   </section>
 
   <script type="text/javascript">
@@ -225,6 +252,65 @@
       }
     });
 
+    // Dount (fill)
+    var v = 82;
+    var t = 100;
+    var l = t - v;
+    var chartPieDountFill = new Chartist.Pie('#chart-pie-donut-fill', 
+        {
+            series: [v, l],
+            labels: ['', '']
+        }, {
+            donut: true,
+            donutWidth: 20,
+            startAngle: 0,
+            showLabel: false,
+            plugins: [
+                Chartist.plugins.fillDonut({
+                    items: [{
+                        content: '<i class="fa fa-tachometer"></i>',
+                        position: 'bottom',
+                        offsetY : 10,
+                        offsetX: -2
+                    }, {
+                        content: '<h3>' + v + '%</h3>'
+                    }]
+                })
+            ],
+        });
+
+    chartPieDountFill.on('draw', function(data) {
+        if(data.type === 'slice' && data.index == 0) {
+            // Get the total path length in order to use for dash array animation
+            var pathLength = data.element._node.getTotalLength();
+
+            // Set a dasharray that matches the path length as prerequisite to animate dashoffset
+            data.element.attr({
+                'stroke-dasharray': pathLength + 'px ' + pathLength + 'px'
+            });
+
+            // Create animation definition while also assigning an ID to the animation for later sync usage
+            var animationDefinition = {
+                'stroke-dashoffset': {
+                    id: 'anim' + data.index,
+                    dur: 1200,
+                    from: -pathLength + 'px',
+                    to:  '0px',
+                    easing: Chartist.Svg.Easing.easeOutQuint,
+                    fill: 'freeze'
+                }
+            };
+
+            // We need to set an initial value before the animation starts as we are not in guided mode which would do that for us
+            data.element.attr({
+                'stroke-dashoffset': -pathLength + 'px'
+            });
+
+            // We can't use guided mode as the animations need to rely on setting begin manually
+            // See http://gionkunz.github.io/chartist-js/api-documentation.html#chartistsvg-function-animate
+            data.element.animate(animationDefinition, true);
+        }
+    });
   </script>
 </div>
 </body>
