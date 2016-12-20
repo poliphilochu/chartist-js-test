@@ -30,6 +30,11 @@
     }
   </style>
   <style type="text/css">
+    * {
+      -webkit-box-sizing: border-box;
+         -moz-box-sizing: border-box;
+              box-sizing: border-box;
+    }
     html, body {
       font: 16px/1.7 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', source-han-sans-traditional, 'Microsoft JhengHei', sans-serif;
       color: #424242;
@@ -78,6 +83,59 @@
     #chart-pie-custom-label .ct-series-c .ct-slice-pie {
       fill: #E88109;
     }
+    .chart-item::after {
+      content:"";
+      display:block;
+      clear:both;
+    }
+    .chart-item .ct-chart {
+      float: left;
+      width: 50%;
+      margin-right: 5%;
+    }
+    .chart-item .ct-chart .ct-label {
+      fill: rgba(255,255,255,.8);
+      color: rgba(255,255,255,.8);
+    }
+    .chart-item .cl-list {
+      float: left;
+      width: 45%;
+    }
+    .cl-list {
+      list-style: none;
+    }
+    .cl-list > li {
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .cl-list > li:before {
+      content: " ";
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-radius: 12px;
+      margin: 5px 0 0 0;
+    }
+    .cl-list > li:nth-child(1):before { background: #d70206; }
+    .cl-list > li:nth-child(2):before { background: #f05b4f; }
+    .cl-list > li:nth-child(3):before { background: #f4c63d; }
+    .cl-list > li:nth-child(4):before { background: #d17905; }
+    .cl-list > li:nth-child(5):before { background: #453d3f; }
+    .cl-list > li:nth-child(6):before { background: #59922b; }
+    .cl-list > li:nth-child(7):before { background: #0544d3; }
+    .cl-list > li:nth-child(8):before { background: #6b0392; }
+    .cl-list > li:nth-child(9):before { background: #f05b4f; }
+    .cl-list > li:nth-child(10):before { background: #dda458; }
+    .cl-list > li:nth-child(11):before { background: #eacf7d; }
+    .cl-list > li:nth-child(12):before { background: #86797d; }
+    .cl-list > li:nth-child(13):before { background: #b2c326; }
+    .cl-list > li:nth-child(14):before { background: #6188e2; }
+    .cl-list > li:nth-child(15):before { background: #a748ca; }
   </style>
   <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
   <script src="vendor/chartist-plugin-tooltip/chartist-plugin-tooltip.min.js"></script>
@@ -92,8 +150,14 @@
     <div id="chart-pie" class="ct-chart ct-chart-pie"></div>
   </section>
   <section>
-    <h3>Pie chart (many data)</h3>
+    <h3>Pie chart (很多資料)</h3>
     <div id="chart-pie-many-data" class="ct-chart ct-chart-pie"></div>
+  </section>
+  <section>
+    <h3>Pie chart (有圖標)</h3>
+    <div id="ci-pie-with-desc" class="chart-item">
+      <div id="chart-pie-with-desc" class="ct-chart ct-chart-pie"></div>
+    </div>
   </section>
   <section>
     <h3>Pie chart with custom label</h3>
@@ -119,6 +183,29 @@
     <h3>Donut (fill)</h3>
     <div id="chart-pie-donut-fill" class="ct-chart ct-chart-pie ct-chart-fill-donut"></div>
   </section>
+
+  <script type="text/javascript">
+    var renderChartLabelList = function(data, elem) {
+      var label, desc, val, percent;
+      var sum = function(a, b) { return a + b };
+      var total = data.series.reduce(sum);
+      var ul = $("<ul class='cl-list' />");
+      for (var i = 0; i < data.series.length; i++) {
+        val = data.series[i];
+        percent = Math.round(val / total * 100);
+        label = data.labels[i];
+        desc = label + " (" + percent + "%)";
+        var li = $("<li/>").addClass("cl-list-item").attr("title", desc).text(label).appendTo(ul);
+      }
+
+      var chartLoadComplete = setInterval(function() {
+        if ($(elem + " > svg").length > 0) {
+          $(elem).parent(".chart-item").append(ul);
+          clearInterval(chartLoadComplete);
+        }
+      }, 100);
+    }
+  </script>
 
   <script type="text/javascript">
 
@@ -147,25 +234,47 @@
         return Math.round(value / data.series.reduce(sum) * 100) + '%';
       }
     });
+
+  // pie chart (有圖標)
+    var data = {
+      labels: ['夏天的香蕉是白色的', '活動報名', '募款餐會餐券', '春天的蘋果還沒成熟', '超商代碼', '回收再生正夯，廢棄啤酒麥粕變身環保建材', '電子報', '秋天的葡萄釀成酒剛剛好', '熱門文章', '聯絡人匯入', '機器人將取代人類工作？美國非營利組織積極培訓勞工，開拓未來就業之路', '冬天的橘子不用烤也好吃', '行動菜車 農村到都市的任意門', '網絡行動科技', '海洋吸塵器'],
+      series: [5, 3, 4, 9, 3, 5, 22, 10, 15, 19, 5, 8, 4, 13, 16]
+    }
+
+    var sum = function(a, b) { return a + b };
+    var i = 0;
+    new Chartist.Pie('#chart-pie-with-desc', data, {
+      labelOffset: 60,
+      labelInterpolationFnc: function(value) {
+        //console.log(value);
+        //console.log(data.series[i]);
+        var s = data.series[i];
+        //var p = Math.round(v / data2.series.reduce(sum2) * 100) + '%';
+        i++;
+        //  return s;
+        return Math.round(s / data.series.reduce(sum) * 100) + '%';
+      }
+    });
+    renderChartLabelList(data, '#chart-pie-with-desc');
   </script>
   <script type="text/javascript">
     // pie chart with custom label
-    var data1 = {
+    var data5 = {
       labels: ['夏天的香蕉', '春天的蘋果', '秋天的葡萄'],
       series: [20, 15, 40]
     };
 
-    var sum1 = function(a, b) { return a + b };
-    var i = 0;
+    var sum5 = function(a, b) { return a + b };
+    var k = 0;
     var options = {
       labelOffset: 100,
       labelDirection: 'explode',
       chartPadding: 20,
       labelInterpolationFnc: function(value) {
-        var v = data1.series[i];
-        var p = Math.round(v / data1.series.reduce(sum1) * 100) + '%';
-        //console.log(p);
-        i++;
+        var v = data5.series[k];
+        var p = Math.round(v / data5.series.reduce(sum5) * 100) + '%';
+        //console.log(v);
+        k++;
         //console.log(data.series.reduce);
         return value + ' ' + p;
       }
@@ -186,7 +295,7 @@
       }]
     ];
 
-    new Chartist.Pie('#chart-pie-custom-label', data1, options);
+    new Chartist.Pie('#chart-pie-custom-label', data5, options);
 
     // Pie with tooltip
     new Chartist.Pie('#chart-pie-tooltip', {
